@@ -3,7 +3,7 @@
 
 !composer.json  # If you use composer (optional)
 /venv
-
+logs/trading_bot.log
 
 /Notebooks
 
