@@ -14,6 +14,9 @@ from bot.logging_config import logger
 
 load_dotenv()
 
+testnet_base_url = os.getenv(
+    "BINANCE_TESTNET_BASE_URL", "https://testnet.binancefuture.com/fapi"
+)
 
 class BinanceFuturesClient:
     """
@@ -35,7 +38,8 @@ class BinanceFuturesClient:
         try:
             self.client = Client(api_key, api_secret, testnet=True)
             # Point the underlying session at the Futures Testnet base URL
-            self.client.FUTURES_URL = "https://testnet.binancefuture.com/fapi"
+
+            self.client.FUTURES_URL = testnet_base_url
             logger.info("Binance Futures Testnet client initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Binance client: {e}")
