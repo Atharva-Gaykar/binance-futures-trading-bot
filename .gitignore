@@ -1,0 +1,43 @@
+# --- Secrets & Credentials ---
+.env
+
+!composer.json  # If you use composer (optional)
+/venv
+
+
+/Notebooks
+
+/AI_Engine_Evaluation
+# --- Python Environment ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+.env.local
+
+# --- FastAPI / App Specific ---
+static/uploads/*
+!static/uploads/.gitkeep
+
+# --- Database ---
+*.sqlite3
+*.db
+*.local
+
+# --- Machine Learning / Large Files ---
+*.h5
+*.pth
+*.pt
+*.tflite
+*.onnx
+
+# --- OS Related ---
+.DS_Store
+Thumbs.db
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
