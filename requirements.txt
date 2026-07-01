@@ -1,0 +1,4 @@
+python-binance==1.0.29
+typer==0.15.1
+pydantic==2.10.4
+python-dotenv==1.0.1
