@@ -7,15 +7,20 @@ Usage:
 """
 
 from typing import Optional
-
 import typer
 from pydantic import ValidationError
-
 from bot.logging_config import logger
 from bot.orders import OrderExecutionError, place_order
 from bot.validators import OrderRequest, OrderSide, OrderType
 
 app = typer.Typer(help="Simplified Trading Bot for Binance Futures Testnet (USDT-M)")
+
+@app.callback()
+def callback():
+    """
+    Binance Futures Testnet Trading Bot CLI.
+    """
+    pass
 
 
 @app.command("place-order")

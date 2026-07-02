@@ -1,9 +1,9 @@
 """
-Binance Futures Testnet client wrapper.
-Handles authentication and raw API calls, isolated from order logic and CLI.
+Binance Futures Testnet client wrapper.Handles authentication and raw API calls, isolated from order logic and CLI.
 """
 
 import os
+import time
 from typing import Optional
 
 from binance.client import Client
@@ -17,6 +17,7 @@ load_dotenv()
 testnet_base_url = os.getenv(
     "BINANCE_TESTNET_BASE_URL", "https://testnet.binancefuture.com/fapi"
 )
+
 
 class BinanceFuturesClient:
     """
@@ -37,10 +38,17 @@ class BinanceFuturesClient:
 
         try:
             self.client = Client(api_key, api_secret, testnet=True)
-            # Point the underlying session at the Futures Testnet base URL
-
             self.client.FUTURES_URL = testnet_base_url
-            logger.info("Binance Futures Testnet client initialized successfully")
+
+            # Correct for local clock drift vs Binance server time
+            server_time = self.client.futures_time()["serverTime"]
+            local_time = int(time.time() * 1000)
+            self.client.timestamp_offset = server_time - local_time
+
+            logger.info(
+                f"Binance Futures Testnet client initialized successfully "
+                f"(timestamp_offset={self.client.timestamp_offset}ms)"
+            )
         except Exception as e:
             logger.error(f"Failed to initialize Binance client: {e}")
             raise
@@ -56,38 +64,88 @@ class BinanceFuturesClient:
         time_in_force: str = "GTC",
     ) -> dict:
         """
-        Places a raw order on Binance Futures Testnet. Returns the raw API
-        response dict. Raises on API or network failure — caller handles that.
+        Places a raw order on Binance Futures Testnet. Routes conditional
+        stop orders (STOP, STOP_MARKET, TAKE_PROFIT, TAKE_PROFIT_MARKET) to
+        the Algo Order endpoint, per Binance's mandatory migration. MARKET
+        and LIMIT orders stay on the standard order endpoint.
         """
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": order_type,
-            "quantity": quantity,
-        }
+        is_algo_order = order_type in (
+            "STOP", "STOP_MARKET", "TAKE_PROFIT", "TAKE_PROFIT_MARKET"
+        )
 
-        if price is not None:
-            params["price"] = price
-        if stop_price is not None:
-            params["stopPrice"] = stop_price
-        if order_type in ("LIMIT", "STOP"):
-            params["timeInForce"] = time_in_force
+        if is_algo_order:
+            params = {
+                "symbol": symbol,
+                "side": side,
+                "type": order_type,
+                "quantity": quantity,
+                "triggerPrice": stop_price,
+            }
+            if price is not None:
+                params["price"] = price
+            if order_type == "STOP":
+                params["timeInForce"] = time_in_force
 
-        logger.info(f"Sending order request to Binance: {params}")
+            logger.info(f"Sending Conditional ALGO order request to Binance: {params}")
 
+            try:
+                response = self.client.futures_create_algo_order(**params)
+                logger.info(f"Algo order response received: {response}")
+                return response
+
+            except BinanceAPIException as e:
+                logger.error(f"Binance Algo API error: {e.status_code} - {e.message}")
+                raise
+
+            except BinanceRequestException as e:
+                logger.error(f"Binance Algo request error: {e}")
+                raise
+
+            except Exception as e:
+                logger.error(f"Unexpected error while placing algo order: {e}")
+                raise
+
+        else:
+            params = {
+                "symbol": symbol,
+                "side": side,
+                "type": order_type,
+                "quantity": quantity,
+            }
+            if price is not None:
+                params["price"] = price
+            if order_type == "LIMIT":
+                params["timeInForce"] = time_in_force
+
+            logger.info(f"Sending Standard order request to Binance: {params}")
+
+            try:
+                response = self.client.futures_create_order(**params)
+                logger.info(f"Order response received: {response}")
+                return response
+
+            except BinanceAPIException as e:
+                logger.error(f"Binance API error: {e.status_code} - {e.message}")
+                raise
+
+            except BinanceRequestException as e:
+                logger.error(f"Binance request error (network/malformed request): {e}")
+                raise
+
+            except Exception as e:
+                logger.error(f"Unexpected error while placing order: {e}")
+                raise
+
+    def get_order_status(self, symbol: str, order_id: int) -> dict:
+        """
+        Queries the current status of a previously placed order.
+        Useful for confirming fill status after MARKET orders.
+        """
+        logger.info(f"Querying order status: symbol={symbol}, orderId={order_id}")
         try:
-            response = self.client.futures_create_order(**params)
-            logger.info(f"Order response received: {response}")
+            response = self.client.futures_get_order(symbol=symbol, orderId=order_id)
+            logger.info(f"Order status response: {response}")
             return response
-
-        except BinanceAPIException as e:
-            logger.error(f"Binance API error: {e.status_code} - {e.message}")
-            raise
-
-        except BinanceRequestException as e:
-            logger.error(f"Binance request error (network/malformed request): {e}")
-            raise
-
-        except Exception as e:
-            logger.error(f"Unexpected error while placing order: {e}")
+        except (BinanceAPIException, BinanceRequestException) as e:
+            logger.error(f"Failed to query order status: {e}")
             raise

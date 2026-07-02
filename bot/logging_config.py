@@ -1,6 +1,5 @@
 """
-Logging configuration for the trading bot.
-Logs all API requests, responses, and errors to both console and file.
+Logging configuration for the trading bot.Logs all API requests, responses, and errors to both console and file.
 """
 
 import logging

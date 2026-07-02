@@ -1,11 +1,9 @@
 """
-Input validation for trading bot orders.
-Uses Pydantic models to validate CLI input before hitting the Binance API.
+Input validation for trading bot orders.Uses Pydantic models to validate CLI input before hitting the Binance API.
 """
 
 from enum import Enum
 from typing import Optional
-
 from pydantic import BaseModel, field_validator, model_validator
 
 
@@ -17,7 +15,7 @@ class OrderSide(str, Enum):
 class OrderType(str, Enum):
     MARKET = "MARKET"
     LIMIT = "LIMIT"
-    STOP_LIMIT = "STOP"  # bonus order type
+    STOP_LIMIT = "STOP_LIMIT"  # bonus order type
 
 
 class OrderRequest(BaseModel):
