@@ -201,9 +201,9 @@ Log excerpts from successful test runs are included in the `logs/` folder:
 See `requirements.txt`:
 
 ```
-python-binance==1.0.37
+python-binance== 1.0.37
 typer==0.15.1
 pydantic==2.10.4
 python-dotenv==1.0.1
-streamlit==1.40.2
+streamlit==1.58.0
 ```
