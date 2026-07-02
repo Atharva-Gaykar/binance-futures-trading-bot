@@ -44,6 +44,13 @@ binance-futures-trading-bot/
 
 ---
 
+## 🧩 Basic System Design
+
+[View on Eraser![](https://app.eraser.io/workspace/Meagp4s4Nn7rJIL0TqzP/preview?diagram=hb3l4IRO8k40bIAVdSvM&type=embed)](https://app.eraser.io/workspace/Meagp4s4Nn7rJIL0TqzP?diagram=hb3l4IRO8k40bIAVdSvM)
+
+
+---
+
 ## ⚙️ Setup
 
 ### 1. Clone the repository
@@ -167,12 +174,6 @@ Log excerpts from successful test runs are included in the `logs/` folder:
 | `logs/market_order_sample.log` | MARKET (required) |
 | `logs/limit_order_sample.log` | LIMIT (required) |
 | `logs/stop_limit_order_sample.log` | STOP_LIMIT (bonus) |
-
----
-
-## 🧩 Basic System Design
-
-[View on Eraser![](https://app.eraser.io/workspace/Meagp4s4Nn7rJIL0TqzP/preview?diagram=hb3l4IRO8k40bIAVdSvM&type=embed)](https://app.eraser.io/workspace/Meagp4s4Nn7rJIL0TqzP?diagram=hb3l4IRO8k40bIAVdSvM)
 
 
 ---
